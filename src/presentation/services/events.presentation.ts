@@ -15,7 +15,7 @@ export class EventsPresentation implements EventsPresentationDTO {
             const {body} = request;
 
             const data = await this.eventsApplication.createEvents({
-                description: body.description,
+                details: body.details,
                 title: body.title,
                 maximumAttendees: body.maximumAttendees
             })

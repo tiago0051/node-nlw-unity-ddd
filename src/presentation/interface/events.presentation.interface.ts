@@ -1,5 +1,5 @@
 export interface ICreateEventsBody {
     title: string;
-    description: string;
+    details: string;
     maximumAttendees?: number;
 }
