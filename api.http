@@ -3,6 +3,6 @@ Content-Type: application/json
 
 {
     "title": "Unite Summit",
-    "description": "Um evento top para tentar aplicar DDD",
+    "details": "Um evento top para tentar aplicar DDD",
     "maximunAttendees": 100
 }

@@ -1,15 +1,15 @@
 export interface ICreateEventsData {
     title: string;
-    description: string;
+    details?: string;
     maximumAttendees?: number;
 }
 
 export interface ICreateEventsReturn {
-    product: {
+    event: {
         id: string;
         title: string;
-        description: string;
-        maximumAttendees?: number;
+        details: string | null;
+        maximumAttendees?: number | null;
         slug: string;
     }
 }
