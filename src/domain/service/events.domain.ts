@@ -5,22 +5,23 @@ import { IEvent } from "../interface/events.domain.interface";
 import { Intercept } from "../../crossCutting/intercept/intercept";
 import { EventsRepositoryDTO } from "../../data/dto/repository/events.repository.dto";
 import { DATA_TYPES } from "../../data/dataTypes";
+import { generateSlug } from "../../utils/generate-slyg";
 
 @injectable()
 export class EventsDomain implements EventsDomainDTO {
     constructor(@inject(DATA_TYPES.eventsRepository) private readonly eventsRepository: EventsRepositoryDTO) {}
 
-    createEvent = async (eventToCreate: IEvent): Promise<EventEntity> => {
-        const slug = eventToCreate.title.toLocaleLowerCase().replaceAll(" ", '-');
+    createEvent = async (event: IEvent): Promise<EventEntity> => {
+        const slug = generateSlug(event.title);
 
-        const existingEventSlug = await this.getEventBySlug(slug);
+        const eventWithSameSlug = await this.getEventBySlug(slug);
 
-        new Intercept('badRequest').boolean(!!existingEventSlug, `Já existe um evento com o slug ${slug}`)
+        new Intercept('badRequest').boolean(!!eventWithSameSlug, `Já existe um evento com o slug ${slug}`)
 
         return new EventEntity({
-            details: eventToCreate.details,
-            maximumAttendees: eventToCreate.maximumAttendees,
-            title: eventToCreate.title,
+            details: event.details,
+            maximumAttendees: event.maximumAttendees,
+            title: event.title,
             slug,
         })
     }
