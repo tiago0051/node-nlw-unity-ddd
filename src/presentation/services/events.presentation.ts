@@ -1,17 +1,20 @@
 import "reflect-metadata";
-import { type FastifyInstance } from "fastify";
-import { type EventsPresentationDTO } from "../dto/events.presentation.dto";
 import { inject, injectable } from "inversify";
-import { EventsApplicationDTO } from "../../application/dto/events.application.dto";
-import { APPLICATION_TYPES } from "../../application/applicationTypes";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
+
+import { type FastifyInstance } from "fastify";
+import { type ZodTypeProvider } from "fastify-type-provider-zod";
+
+import { type EventsPresentationDTO } from "../dto/events.presentation.dto";
+import { type EventsApplicationDTO } from "../../application/dto/events.application.dto";
+
+import { APPLICATION_TYPES } from "../../application/applicationTypes";
 
 @injectable()
 export class EventsPresentation implements EventsPresentationDTO {
   constructor(
     @inject(APPLICATION_TYPES.events)
-    private readonly eventsApplication: EventsApplicationDTO
+    private readonly eventsApplication: EventsApplicationDTO,
   ) {}
 
   createEvents = async (fastify: FastifyInstance) => {
@@ -40,14 +43,14 @@ export class EventsPresentation implements EventsPresentationDTO {
       async (request, reply) => {
         const { title, details = null, maximumAttendees = null } = request.body;
 
-        const data = await this.eventsApplication.createEvents({
+        const applicationReturn = await this.eventsApplication.createEvents({
           details,
           title,
           maximumAttendees,
         });
 
-        return reply.status(201).send(data);
-      }
+        return reply.status(201).send(applicationReturn);
+      },
     );
   };
 
@@ -79,14 +82,14 @@ export class EventsPresentation implements EventsPresentationDTO {
         const { email, name } = request.body;
         const { eventId } = request.params;
 
-        const data = await this.eventsApplication.createAttendees({
+        const applicationReturn = await this.eventsApplication.createAttendees({
           email,
           eventId,
           name,
         });
 
-        return reply.status(201).send(data);
-      }
+        return reply.status(201).send(applicationReturn);
+      },
     );
   };
 }

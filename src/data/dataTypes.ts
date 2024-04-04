@@ -1,4 +1,4 @@
 export const DATA_TYPES = {
-    prismaProvider: Symbol.for("PrismaClient"),
-    eventsRepository: Symbol.for("EventsRepositoryDTO")
-}
+  eventsRepository: Symbol.for("EventsRepositoryDTO"),
+  prismaProvider: Symbol.for("PrismaClient"),
+};

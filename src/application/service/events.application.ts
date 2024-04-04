@@ -1,39 +1,34 @@
+import "reflect-metadata";
 import { inject, injectable } from "inversify";
-import { EventsApplicationDTO } from "../dto/events.application.dto";
+
+import { type EventsApplicationDTO } from "../dto/events.application.dto";
 import {
-  ICreateEventsData,
-  ICreateEventsReturn,
-  IRegisterForEventData,
-  IRegisterForEventReturn,
+  type ICreateEventsData,
+  type ICreateEventsReturn,
+  type IRegisterForEventData,
+  type IRegisterForEventReturn,
 } from "../interface/events.application.interface";
-import { EventsDomainDTO } from "../../domain/dto/events.domain.dto";
-import { DOMAIN_TYPES } from "../../domain/domainTypes";
-import { Intercept } from "../../crossCutting/intercept/intercept";
-import { EventEntity } from "../../domain/entity/EventEntity";
+import { type EventsDomainDTO } from "../../domain/dto/events.domain.dto";
+
 import { AttendeeEntity } from "../../domain/entity/AttendeeEntity";
+import { DOMAIN_TYPES } from "../../domain/domainTypes";
+import { EventEntity } from "../../domain/entity/EventEntity";
+import { Intercept } from "../../crossCutting/intercept/intercept";
 
 @injectable()
 export class EventsApplication implements EventsApplicationDTO {
-  constructor(
-    @inject(DOMAIN_TYPES.events) private readonly eventsDomain: EventsDomainDTO
-  ) {}
+  constructor(@inject(DOMAIN_TYPES.events) private readonly eventsDomain: EventsDomainDTO) {}
 
-  createAttendees = async (
-    data: IRegisterForEventData
-  ): Promise<IRegisterForEventReturn> => {
+  createAttendees = async (data: IRegisterForEventData): Promise<IRegisterForEventReturn> => {
     const { email, eventId, name } = data;
 
     const eventDomain = await this.eventsDomain.getEventById(eventId);
 
     new Intercept("badRequest").boolean(!eventDomain, "Evento não encontrado");
 
-    const attendeeWithSameEmailInEvent =
-      await this.eventsDomain.getAttendeeInEventByEmail(eventId, email);
+    const attendeeWithSameEmailInEvent = await this.eventsDomain.getAttendeeInEventByEmail(eventId, email);
 
-    new Intercept("conflict").boolean(
-      !!attendeeWithSameEmailInEvent,
-      "O email informado já está cadastrado no evento"
-    );
+    new Intercept("conflict").boolean(!!attendeeWithSameEmailInEvent, "O email informado já está cadastrado no evento");
 
     let attendee = new AttendeeEntity({
       email,
@@ -48,19 +43,14 @@ export class EventsApplication implements EventsApplicationDTO {
     };
   };
 
-  createEvents = async (
-    data: ICreateEventsData
-  ): Promise<ICreateEventsReturn> => {
+  createEvents = async (data: ICreateEventsData): Promise<ICreateEventsReturn> => {
     const { details, title, maximumAttendees } = data;
 
     const slug = this.eventsDomain.generateSlugByEventTitle(title);
 
     const eventWithSameSlug = await this.eventsDomain.getEventBySlug(slug);
 
-    new Intercept("badRequest").boolean(
-      !!eventWithSameSlug,
-      `Já existe um evento com o slug ${slug}`
-    );
+    new Intercept("badRequest").boolean(!!eventWithSameSlug, `Já existe um evento com o slug ${slug}`);
 
     let event = new EventEntity({
       title,

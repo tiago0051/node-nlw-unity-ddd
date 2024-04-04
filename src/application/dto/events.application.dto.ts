@@ -6,8 +6,6 @@ import {
 } from "../interface/events.application.interface";
 
 export interface EventsApplicationDTO {
+  createAttendees: (data: IRegisterForEventData) => Promise<IRegisterForEventReturn>;
   createEvents: (data: ICreateEventsData) => Promise<ICreateEventsReturn>;
-  createAttendees: (
-    data: IRegisterForEventData
-  ) => Promise<IRegisterForEventReturn>;
 }

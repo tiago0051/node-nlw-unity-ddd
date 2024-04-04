@@ -1,19 +1,21 @@
+import { inject, injectable } from "inversify";
+
 import { type EventsDomainDTO } from "../dto/events.domain.dto";
 import { type EventEntity } from "../entity/EventEntity";
 import { type EventsRepositoryDTO } from "../../data/dto/repository/events.repository.dto";
 import { type AttendeeEntity } from "../entity/AttendeeEntity";
-import { inject, injectable } from "inversify";
+
 import { DATA_TYPES } from "../../data/dataTypes";
 
 @injectable()
 export class EventsDomain implements EventsDomainDTO {
   constructor(
     @inject(DATA_TYPES.eventsRepository)
-    private readonly eventsRepository: EventsRepositoryDTO
+    private readonly eventsRepository: EventsRepositoryDTO,
   ) {}
 
-  generateSlugByEventTitle = (text: string): string => {
-    return text
+  generateSlugFromEventTitle = (eventTitle: string): string => {
+    return eventTitle
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
@@ -21,18 +23,12 @@ export class EventsDomain implements EventsDomainDTO {
       .replace(/\s+/g, "-");
   };
 
-  getAttendeeInEventByEmail = async (
-    eventId: string,
-    email: string
-  ): Promise<AttendeeEntity | null> => {
-    return await this.eventsRepository.getAttendeeInEventByEmail(
-      eventId,
-      email
-    );
+  getAttendeeByEventAndEmail = async (eventId: string, attendeeEmail: string): Promise<AttendeeEntity | null> => {
+    return await this.eventsRepository.getAttendeeInEventByEmail(eventId, attendeeEmail);
   };
 
-  getEventById = async (id: string): Promise<EventEntity | null> => {
-    return await this.eventsRepository.getEventById(id);
+  getEventById = async (eventId: string): Promise<EventEntity | null> => {
+    return await this.eventsRepository.getEventById(eventId);
   };
 
   getEventBySlug = async (slug: string): Promise<EventEntity | null> => {
