@@ -2,16 +2,16 @@ POST http://localhost:3333/events
 Content-Type: application/json
 
 {
-    "title": "Feira de móveis",
+    "title": "Feira de móveis em papucaia",
     "details": "Um evento top para tentar aplicar DDD",
-    "maximumAttendees": 100
+    "maximumAttendees": 2
 }
 
 ###
-POST http://localhost:3333/events/d90b70e4-88cd-4e4d-8c6a-e4e1a8f5310a/attendees
+POST http://localhost:3333/events/02e2d13a-7176-4cfa-8eb8-d8dac4b1bbc7/attendees
 Content-Type: application/json
 
 {
     "name": "Fernando",
-    "email": "fernando@teste.com"
+    "email": "fernando@teste3.com"
 }

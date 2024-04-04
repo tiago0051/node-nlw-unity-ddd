@@ -27,6 +27,10 @@ export class EventsDomain implements EventsDomainDTO {
     return await this.eventsRepository.getAttendeeInEventByEmail(eventId, attendeeEmail);
   };
 
+  getAttendeesAmountInEvent = async (eventId: string): Promise<number> => {
+    return await this.eventsRepository.getAttendeesAmountInEvent(eventId);
+  };
+
   getEventById = async (eventId: string): Promise<EventEntity | null> => {
     return await this.eventsRepository.getEventById(eventId);
   };

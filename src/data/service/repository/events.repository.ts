@@ -25,6 +25,16 @@ export class EventsRepository implements EventsRepositoryDTO {
     return attendeeDB && new AttendeeEntity(attendeeDB, attendeeDB.id);
   };
 
+  getAttendeesAmountInEvent = async (eventId: string): Promise<number> => {
+    const amountOfAttendees = await this.prisma.attendee.count({
+      where: {
+        eventId,
+      },
+    });
+
+    return amountOfAttendees;
+  };
+
   getEventById = async (id: string): Promise<EventEntity | null> => {
     const eventDB = await this.prisma.event.findUnique({
       where: {

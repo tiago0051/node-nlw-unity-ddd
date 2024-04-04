@@ -26,9 +26,16 @@ export class EventsApplication implements EventsApplicationDTO {
 
     new Intercept("badRequest").boolean(!eventDomain, "Evento não encontrado");
 
-    const attendeeWithSameEmailInEvent = await this.eventsDomain.getAttendeeInEventByEmail(eventId, email);
+    const attendeeWithSameEmailInEvent = await this.eventsDomain.getAttendeeByEventAndEmail(eventId, email);
 
     new Intercept("conflict").boolean(!!attendeeWithSameEmailInEvent, "O email informado já está cadastrado no evento");
+
+    const amountOfAttendeesForEvent = await this.eventsDomain.getAttendeesAmountInEvent(eventId);
+
+    new Intercept("conflict").boolean(
+      amountOfAttendeesForEvent >= eventDomain!.maximumAttendees!,
+      "O número máximo de participantes foi atingido",
+    );
 
     let attendee = new AttendeeEntity({
       email,
@@ -46,7 +53,7 @@ export class EventsApplication implements EventsApplicationDTO {
   createEvents = async (data: ICreateEventsData): Promise<ICreateEventsReturn> => {
     const { details, title, maximumAttendees } = data;
 
-    const slug = this.eventsDomain.generateSlugByEventTitle(title);
+    const slug = this.eventsDomain.generateSlugFromEventTitle(title);
 
     const eventWithSameSlug = await this.eventsDomain.getEventBySlug(slug);
 
