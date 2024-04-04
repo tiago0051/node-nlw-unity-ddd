@@ -2,7 +2,16 @@ POST http://localhost:3333/events
 Content-Type: application/json
 
 {
-    "title": "Unite Férst Cláss",
+    "title": "Feira de móveis",
     "details": "Um evento top para tentar aplicar DDD",
-    "maximunAttendees": 100
+    "maximumAttendees": 100
+}
+
+###
+POST http://localhost:3333/events/d90b70e4-88cd-4e4d-8c6a-e4e1a8f5310a/attendees
+Content-Type: application/json
+
+{
+    "name": "Fernando",
+    "email": "fernando@teste.com"
 }

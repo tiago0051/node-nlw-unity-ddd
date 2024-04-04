@@ -1,36 +1,49 @@
+import { type EventsDomainDTO } from "../dto/events.domain.dto";
+import { type EventEntity } from "../entity/EventEntity";
+import { type EventsRepositoryDTO } from "../../data/dto/repository/events.repository.dto";
+import { type AttendeeEntity } from "../entity/AttendeeEntity";
 import { inject, injectable } from "inversify";
-import { EventsDomainDTO } from "../dto/events.domain.dto";
-import { EventEntity } from "../entity/EventEntity";
-import { IEvent } from "../interface/events.domain.interface";
-import { Intercept } from "../../crossCutting/intercept/intercept";
-import { EventsRepositoryDTO } from "../../data/dto/repository/events.repository.dto";
 import { DATA_TYPES } from "../../data/dataTypes";
-import { generateSlug } from "../../utils/generate-slyg";
 
 @injectable()
 export class EventsDomain implements EventsDomainDTO {
-    constructor(@inject(DATA_TYPES.eventsRepository) private readonly eventsRepository: EventsRepositoryDTO) {}
+  constructor(
+    @inject(DATA_TYPES.eventsRepository)
+    private readonly eventsRepository: EventsRepositoryDTO
+  ) {}
 
-    createEvent = async (event: IEvent): Promise<EventEntity> => {
-        const slug = generateSlug(event.title);
+  generateSlugByEventTitle = (text: string): string => {
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^\W\S-]/g, "")
+      .replace(/\s+/g, "-");
+  };
 
-        const eventWithSameSlug = await this.getEventBySlug(slug);
+  getAttendeeInEventByEmail = async (
+    eventId: string,
+    email: string
+  ): Promise<AttendeeEntity | null> => {
+    return await this.eventsRepository.getAttendeeInEventByEmail(
+      eventId,
+      email
+    );
+  };
 
-        new Intercept('badRequest').boolean(!!eventWithSameSlug, `Já existe um evento com o slug ${slug}`)
+  getEventById = async (id: string): Promise<EventEntity | null> => {
+    return await this.eventsRepository.getEventById(id);
+  };
 
-        return new EventEntity({
-            details: event.details,
-            maximumAttendees: event.maximumAttendees,
-            title: event.title,
-            slug,
-        })
-    }
+  getEventBySlug = async (slug: string): Promise<EventEntity | null> => {
+    return await this.eventsRepository.getEventBySlug(slug);
+  };
 
-    private getEventBySlug = async (slug: string): Promise<EventEntity | null> => {
-        return await this.eventsRepository.getEventBySlug(slug);
-    }
+  saveAttendee = async (attendee: AttendeeEntity): Promise<AttendeeEntity> => {
+    return await this.eventsRepository.saveAttendee(attendee);
+  };
 
-    saveEvent = async (event: EventEntity): Promise<EventEntity> => {
-        return await this.eventsRepository.saveEvent(event);
-    }
+  saveEvent = async (event: EventEntity): Promise<EventEntity> => {
+    return await this.eventsRepository.saveEvent(event);
+  };
 }

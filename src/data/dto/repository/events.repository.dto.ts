@@ -1,6 +1,13 @@
-import { EventModel } from "../../model/EventModel";
+import { type AttendeeEntity } from "../../../domain/entity/AttendeeEntity";
+import { type EventEntity } from "../../../domain/entity/EventEntity";
 
 export interface EventsRepositoryDTO {
-    getEventBySlug: (slug: string) => Promise<EventModel | null>
-    saveEvent: (event: EventModel) => Promise<EventModel>
+  getAttendeeInEventByEmail: (
+    eventId: string,
+    email: string
+  ) => Promise<AttendeeEntity | null>;
+  getEventById: (id: string) => Promise<EventEntity | null>;
+  getEventBySlug: (slug: string) => Promise<EventEntity | null>;
+  saveAttendee: (attendee: AttendeeEntity) => Promise<AttendeeEntity>;
+  saveEvent: (event: EventEntity) => Promise<EventEntity>;
 }

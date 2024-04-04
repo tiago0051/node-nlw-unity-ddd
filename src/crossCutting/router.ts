@@ -5,14 +5,22 @@ import { Container } from "inversify";
 import { exceptionErrorHandle } from "./intercept/exception/exceptionErrorHandle";
 
 export class Router {
-    constructor(private readonly container: Container) {}
-    init = async(fastify: FastifyInstance): Promise<void> => {
-        fastify.setErrorHandler(exceptionErrorHandle)
+  constructor(private readonly container: Container) {}
+  init = async (fastify: FastifyInstance): Promise<void> => {
+    fastify.setErrorHandler(exceptionErrorHandle);
 
-        const eventsPresentation = this.container.get<EventsPresentationDTO>(PRESENTATION_TYPES.events);
+    const eventsPresentation = this.container.get<EventsPresentationDTO>(
+      PRESENTATION_TYPES.events
+    );
 
-        await fastify.register(eventsPresentation.createEvents, {
-            prefix: "events"
-        })
-    }
+    await fastify.register(
+      async (instance) => {
+        await eventsPresentation.createEvents(instance);
+        await eventsPresentation.registerForEvent(instance);
+      },
+      {
+        prefix: "events",
+      }
+    );
+  };
 }

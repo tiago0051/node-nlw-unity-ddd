@@ -1,32 +1,72 @@
 import { inject, injectable } from "inversify";
 import { EventsRepositoryDTO } from "../../dto/repository/events.repository.dto";
-import { EventModel } from "../../model/EventModel";
 import { PrismaClient } from "@prisma/client";
 import { DATA_TYPES } from "../../dataTypes";
+import { EventEntity } from "../../../domain/entity/EventEntity";
+import { AttendeeEntity } from "../../../domain/entity/AttendeeEntity";
 
 @injectable()
 export class EventsRepository implements EventsRepositoryDTO {
-    constructor(@inject(DATA_TYPES.prismaProvider) private readonly prisma: PrismaClient) {}
+  constructor(
+    @inject(DATA_TYPES.prismaProvider) private readonly prisma: PrismaClient
+  ) {}
+  getAttendeeInEventByEmail = async (
+    eventId: string,
+    email: string
+  ): Promise<AttendeeEntity | null> => {
+    const attendeeDB = await this.prisma.attendee.findUnique({
+      where: {
+        eventId_email: {
+          email,
+          eventId,
+        },
+      },
+    });
 
-    getEventBySlug = async (slug: string): Promise<EventModel | null> => {
-        const eventDB = await this.prisma.event.findUnique({
-            where: {
-                slug
-            }
-        })
+    return attendeeDB && new AttendeeEntity(attendeeDB, attendeeDB.id);
+  };
 
-        return eventDB && new EventModel(eventDB)
-    }
-    
-    saveEvent = async (event: EventModel): Promise<EventModel> => {
-        const eventDB = await this.prisma.event.upsert({
-            where: {
-                id: event.id,
-            },
-            create: event,
-            update: event
-        })
+  getEventById = async (id: string): Promise<EventEntity | null> => {
+    const eventDB = await this.prisma.event.findUnique({
+      where: {
+        id,
+      },
+    });
 
-        return new EventModel(eventDB);
-    }
+    return eventDB && new EventEntity(eventDB, eventDB.id);
+  };
+
+  saveAttendee = async (attendee: AttendeeEntity): Promise<AttendeeEntity> => {
+    const attendeeDB = await this.prisma.attendee.upsert({
+      where: {
+        id: attendee.id,
+      },
+      create: attendee,
+      update: attendee,
+    });
+
+    return new AttendeeEntity(attendeeDB, attendeeDB.id);
+  };
+
+  getEventBySlug = async (slug: string): Promise<EventEntity | null> => {
+    const eventDB = await this.prisma.event.findUnique({
+      where: {
+        slug,
+      },
+    });
+
+    return eventDB && new EventEntity(eventDB, eventDB.id);
+  };
+
+  saveEvent = async (event: EventEntity): Promise<EventEntity> => {
+    const eventDB = await this.prisma.event.upsert({
+      where: {
+        id: event.id,
+      },
+      create: event,
+      update: event,
+    });
+
+    return new EventEntity(eventDB, eventDB.id);
+  };
 }
