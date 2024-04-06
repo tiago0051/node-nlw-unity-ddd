@@ -3,10 +3,10 @@ import { EventEntity } from "../entity/EventEntity";
 
 export interface EventsDomainDTO {
   generateSlugFromEventTitle: (eventTitle: string) => string;
-  getAttendeesAmountInEvent: (eventId: string) => Promise<number>;
-  getAttendeeByEventAndEmail: (eventId: string, email: string) => Promise<AttendeeEntity | null>;
-  getEventById: (id: string) => Promise<EventEntity | null>;
-  getEventBySlug: (slug: string) => Promise<EventEntity | null>;
+  getAttendeeByEventAndEmail: (eventId: string, email: string) => Promise<AttendeeEntity>;
+  getAttendeeById: (attendeeId: string) => Promise<AttendeeEntity>;
+  getEventById: (id: string) => Promise<EventEntity>;
+  getEventBySlug: (slug: string) => Promise<EventEntity>;
   saveAttendee: (attendee: AttendeeEntity) => Promise<AttendeeEntity>;
   saveEvent: (event: EventEntity) => Promise<EventEntity>;
 }

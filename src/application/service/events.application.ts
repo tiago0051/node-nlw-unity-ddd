@@ -3,10 +3,12 @@ import { inject, injectable } from "inversify";
 
 import { type EventsApplicationDTO } from "../dto/events.application.dto";
 import {
+  IGetEventReturn,
   type ICreateEventsData,
   type ICreateEventsReturn,
   type IRegisterForEventData,
   type IRegisterForEventReturn,
+  IGetAttendeeBadgeReturn,
 } from "../interface/events.application.interface";
 import { type EventsDomainDTO } from "../../domain/dto/events.domain.dto";
 
@@ -22,26 +24,29 @@ export class EventsApplication implements EventsApplicationDTO {
   createAttendees = async (data: IRegisterForEventData): Promise<IRegisterForEventReturn> => {
     const { email, eventId, name } = data;
 
-    const eventDomain = await this.eventsDomain.getEventById(eventId);
+    const event = await this.eventsDomain.getEventById(eventId);
 
-    new Intercept("badRequest").boolean(!eventDomain, "Evento não encontrado");
-
-    const attendeeWithSameEmailInEvent = await this.eventsDomain.getAttendeeByEventAndEmail(eventId, email);
-
-    new Intercept("conflict").boolean(!!attendeeWithSameEmailInEvent, "O email informado já está cadastrado no evento");
-
-    const amountOfAttendeesForEvent = await this.eventsDomain.getAttendeesAmountInEvent(eventId);
-
-    new Intercept("conflict").boolean(
-      amountOfAttendeesForEvent >= eventDomain!.maximumAttendees!,
-      "O número máximo de participantes foi atingido",
-    );
+    new Intercept("badRequest").boolean(!event, "Evento não encontrado");
 
     let attendee = new AttendeeEntity({
       email,
       eventId,
       name,
     });
+
+    const attendeeWithSameEmailInEvent = await this.eventsDomain.getAttendeeByEventAndEmail(
+      attendee.eventId,
+      attendee.email,
+    );
+
+    new Intercept("badRequest").boolean(
+      !!attendeeWithSameEmailInEvent,
+      "O email informado já está cadastrado no evento",
+    );
+
+    const exceedsMaximumAttendees = event.maximumAttendees && event.amountAttendees >= event.maximumAttendees;
+
+    new Intercept("badRequest").boolean(exceedsMaximumAttendees, "O número máximo de participantes foi atingido");
 
     attendee = await this.eventsDomain.saveAttendee(attendee);
 
@@ -64,9 +69,39 @@ export class EventsApplication implements EventsApplicationDTO {
       details,
       maximumAttendees,
       slug,
+      amountAttendees: null,
     });
 
     event = await this.eventsDomain.saveEvent(event);
+
+    return {
+      event,
+    };
+  };
+
+  getAttendeeBadge = async (eventId: string, attendeeId: string): Promise<IGetAttendeeBadgeReturn> => {
+    const [event, attendee] = await Promise.all([
+      this.eventsDomain.getEventById(eventId),
+      this.eventsDomain.getAttendeeById(attendeeId),
+    ]);
+
+    new Intercept("badRequest").boolean(!event, "Evento não encontrado");
+    new Intercept("badRequest").boolean(!attendee, "Participante não encontrado");
+
+    return {
+      badge: {
+        attendeeEmail: attendee.email,
+        attendeeId: attendee.id,
+        attendeeName: attendee.name,
+        eventTitle: event.title,
+      },
+    };
+  };
+
+  getEvent = async (eventId: string): Promise<IGetEventReturn> => {
+    const event = await this.eventsDomain.getEventById(eventId);
+
+    new Intercept("notFound").boolean(!event, "Evento não encontrado");
 
     return {
       event,

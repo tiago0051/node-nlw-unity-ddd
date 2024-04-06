@@ -23,19 +23,19 @@ export class EventsDomain implements EventsDomainDTO {
       .replace(/\s+/g, "-");
   };
 
-  getAttendeeByEventAndEmail = async (eventId: string, attendeeEmail: string): Promise<AttendeeEntity | null> => {
-    return await this.eventsRepository.getAttendeeInEventByEmail(eventId, attendeeEmail);
+  getAttendeeByEventAndEmail = async (eventId: string, attendeeEmail: string): Promise<AttendeeEntity> => {
+    return await this.eventsRepository.getAttendeeByEventAndEmail(eventId, attendeeEmail);
   };
 
-  getAttendeesAmountInEvent = async (eventId: string): Promise<number> => {
-    return await this.eventsRepository.getAttendeesAmountInEvent(eventId);
+  getAttendeeById = async (attendeeId: string): Promise<AttendeeEntity> => {
+    return await this.eventsRepository.getAttendeeById(attendeeId);
   };
 
-  getEventById = async (eventId: string): Promise<EventEntity | null> => {
+  getEventById = async (eventId: string): Promise<EventEntity> => {
     return await this.eventsRepository.getEventById(eventId);
   };
 
-  getEventBySlug = async (slug: string): Promise<EventEntity | null> => {
+  getEventBySlug = async (slug: string): Promise<EventEntity> => {
     return await this.eventsRepository.getEventBySlug(slug);
   };
 

@@ -2,16 +2,22 @@ POST http://localhost:3333/events
 Content-Type: application/json
 
 {
-    "title": "Feira de móveis em papucaia",
+    "title": "Feira de móveis em papucaia v3",
     "details": "Um evento top para tentar aplicar DDD",
-    "maximumAttendees": 2
+    "maximumAttendees": 10
 }
 
 ###
-POST http://localhost:3333/events/02e2d13a-7176-4cfa-8eb8-d8dac4b1bbc7/attendees
+POST http://localhost:3333/events/22f209af-76f2-4702-8dcb-f5dc047bd47b/attendees
 Content-Type: application/json
 
 {
     "name": "Fernando",
     "email": "fernando@teste3.com"
 }
+
+###
+GET http://localhost:3333/events/22f209af-76f2-4702-8dcb-f5dc047bd47b
+
+###
+GET http://localhost:3333/events/22f209af-76f2-4702-8dcb-f5dc047bd47b/attendees/17cb05f9-a763-4dda-b636-d736dedb0891

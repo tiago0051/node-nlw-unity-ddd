@@ -12,7 +12,7 @@ import { AttendeeEntity } from "../../../domain/entity/AttendeeEntity";
 export class EventsRepository implements EventsRepositoryDTO {
   constructor(@inject(DATA_TYPES.prismaProvider) private readonly prisma: PrismaClient) {}
 
-  getAttendeeInEventByEmail = async (eventId: string, email: string): Promise<AttendeeEntity | null> => {
+  getAttendeeByEventAndEmail = async (eventId: string, email: string): Promise<AttendeeEntity> => {
     const attendeeDB = await this.prisma.attendee.findUnique({
       where: {
         eventId_email: {
@@ -20,39 +20,93 @@ export class EventsRepository implements EventsRepositoryDTO {
           eventId,
         },
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        eventId: true,
+      },
     });
 
     return attendeeDB && new AttendeeEntity(attendeeDB, attendeeDB.id);
   };
 
-  getAttendeesAmountInEvent = async (eventId: string): Promise<number> => {
-    const amountOfAttendees = await this.prisma.attendee.count({
+  getAttendeeById = async (attendeeId: string): Promise<AttendeeEntity> => {
+    const attendeeDB = await this.prisma.attendee.findUnique({
       where: {
-        eventId,
+        id: attendeeId,
       },
     });
 
-    return amountOfAttendees;
+    return attendeeDB && new AttendeeEntity(attendeeDB, attendeeDB.id);
   };
 
-  getEventById = async (id: string): Promise<EventEntity | null> => {
+  getEventById = async (id: string): Promise<EventEntity> => {
     const eventDB = await this.prisma.event.findUnique({
       where: {
         id,
       },
+      select: {
+        id: true,
+        title: true,
+        details: true,
+        maximumAttendees: true,
+        slug: true,
+        _count: {
+          select: {
+            Attendee: true,
+          },
+        },
+      },
     });
 
-    return eventDB && new EventEntity(eventDB, eventDB.id);
+    return (
+      eventDB &&
+      new EventEntity(
+        {
+          amountAttendees: eventDB._count.Attendee,
+          details: eventDB.details,
+          maximumAttendees: eventDB._count.Attendee,
+          slug: eventDB.slug,
+          title: eventDB.title,
+        },
+        eventDB.id,
+      )
+    );
   };
 
-  getEventBySlug = async (slug: string): Promise<EventEntity | null> => {
+  getEventBySlug = async (slug: string): Promise<EventEntity> => {
     const eventDB = await this.prisma.event.findUnique({
       where: {
         slug,
       },
+      select: {
+        id: true,
+        title: true,
+        details: true,
+        maximumAttendees: true,
+        slug: true,
+        _count: {
+          select: {
+            Attendee: true,
+          },
+        },
+      },
     });
 
-    return eventDB && new EventEntity(eventDB, eventDB.id);
+    return (
+      eventDB &&
+      new EventEntity(
+        {
+          amountAttendees: eventDB._count.Attendee,
+          details: eventDB.details,
+          maximumAttendees: eventDB._count.Attendee,
+          slug: eventDB.slug,
+          title: eventDB.title,
+        },
+        eventDB.id,
+      )
+    );
   };
 
   saveAttendee = async (attendee: AttendeeEntity): Promise<AttendeeEntity> => {
@@ -62,6 +116,12 @@ export class EventsRepository implements EventsRepositoryDTO {
       },
       create: attendee,
       update: attendee,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        eventId: true,
+      },
     });
 
     return new AttendeeEntity(attendeeDB, attendeeDB.id);
@@ -74,8 +134,29 @@ export class EventsRepository implements EventsRepositoryDTO {
       },
       create: event,
       update: event,
+      select: {
+        id: true,
+        title: true,
+        details: true,
+        maximumAttendees: true,
+        slug: true,
+        _count: {
+          select: {
+            Attendee: true,
+          },
+        },
+      },
     });
 
-    return new EventEntity(eventDB, eventDB.id);
+    return new EventEntity(
+      {
+        amountAttendees: eventDB._count.Attendee,
+        details: eventDB.details,
+        maximumAttendees: eventDB._count.Attendee,
+        slug: eventDB.slug,
+        title: eventDB.title,
+      },
+      eventDB.id,
+    );
   };
 }

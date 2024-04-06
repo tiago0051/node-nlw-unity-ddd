@@ -1,15 +1,15 @@
 export interface ICreateEventsData {
   title: string;
-  details: string | null;
-  maximumAttendees: number | null;
+  details: string;
+  maximumAttendees: number;
 }
 
 export interface ICreateEventsReturn {
   event: {
     id: string;
     title: string;
-    details: string | null;
-    maximumAttendees: number | null;
+    details: string;
+    maximumAttendees: number;
     slug: string;
   };
 }
@@ -26,5 +26,24 @@ export interface IRegisterForEventReturn {
     name: string;
     email: string;
     eventId: string;
+  };
+}
+
+export interface IGetAttendeeBadgeReturn {
+  badge: {
+    attendeeEmail: string;
+    attendeeId: string;
+    attendeeName: string;
+    eventTitle: string;
+  };
+}
+
+export interface IGetEventReturn {
+  event: {
+    id: string;
+    title: string;
+    details: string;
+    maximumAttendees: number;
+    slug: string;
   };
 }

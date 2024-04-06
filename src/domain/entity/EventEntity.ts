@@ -8,22 +8,21 @@ const eventEntitySchema = z.object({
   maximumAttendees: z.number().int().positive().nullable(),
   slug: z.string().min(5).max(191),
   title: z.string().min(5).max(191),
+  amountAttendees: z.number().int().positive().nullable(),
 });
 
 export class EventEntity extends Entity implements z.infer<typeof eventEntitySchema> {
-  public details: string | null;
-  public maximumAttendees: number | null;
+  public amountAttendees: number;
+  public details: string;
+  public maximumAttendees: number;
   public slug: string;
   public title: string;
 
-  constructor(props: z.infer<typeof eventEntitySchema>, id?: string) {
+  constructor(props: Omit<EventEntity, "id">, id?: string) {
     super(id);
 
-    new Intercept("badRequest").zod(eventEntitySchema, props);
+    Object.assign(this, props);
 
-    this.details = props.details;
-    this.maximumAttendees = props.maximumAttendees;
-    this.slug = props.slug;
-    this.title = props.title;
+    new Intercept("badRequest").zod(eventEntitySchema, this);
   }
 }
