@@ -22,6 +22,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       {
         schema: {
           tags: ["event"],
+          summary: "Attendee check-in in event",
           params: z.object({
             eventId: z.string().uuid(),
             attendeeId: z.string().uuid(),
@@ -44,6 +45,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       {
         schema: {
           tags: ["event"],
+          summary: "Create an event",
           body: z.object({
             title: z.string(),
             details: z.string().nullish(),
@@ -82,6 +84,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       {
         schema: {
           tags: ["event"],
+          summary: "Get the attendee badge",
           params: z.object({
             eventId: z.string().uuid(),
             attendeeId: z.string().uuid(),
@@ -116,6 +119,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       {
         schema: {
           tags: ["event"],
+          summary: "Get information about an event",
           params: z.object({
             eventId: z.string().uuid(),
           }),
@@ -148,12 +152,13 @@ export class EventsPresentation implements EventsPresentationDTO {
       {
         schema: {
           tags: ["event"],
+          summary: "Get event attendees",
           params: z.object({
             eventId: z.string().uuid(),
           }),
           querystring: z.object({
-            take: z.coerce.number().int().positive().nullish(),
-            pageIndex: z.coerce.number().int().min(0).nullish(),
+            take: z.coerce.number().int().positive().nullish().default(10),
+            pageIndex: z.coerce.number().int().min(0).nullish().default(0),
             search: z.string().nullish(),
           }),
           response: {
@@ -187,19 +192,20 @@ export class EventsPresentation implements EventsPresentationDTO {
       {
         schema: {
           tags: ["event"],
+          summary: "Register new attendee in an event",
           params: z.object({
             eventId: z.string().uuid(),
           }),
           body: z.object({
             name: z.string(),
-            email: z.string(),
+            email: z.string().email(),
           }),
           response: {
             201: z.object({
               attendee: z.object({
                 id: z.string().uuid(),
                 name: z.string(),
-                email: z.string(),
+                email: z.string().email(),
                 eventId: z.string().uuid(),
               }),
             }),
