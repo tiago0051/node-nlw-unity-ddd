@@ -9,6 +9,7 @@ import {
   type IRegisterForEventData,
   type IRegisterForEventReturn,
   IGetAttendeeBadgeReturn,
+  IGetEventAttendeesReturn,
 } from "../interface/events.application.interface";
 import { type EventsDomainDTO } from "../../domain/dto/events.domain.dto";
 
@@ -21,6 +22,22 @@ import { Intercept } from "../../crossCutting/intercept/intercept";
 export class EventsApplication implements EventsApplicationDTO {
   constructor(@inject(DOMAIN_TYPES.events) private readonly eventsDomain: EventsDomainDTO) {}
 
+  attendeeCheckIn = async (eventId: string, attendeeId: string): Promise<void> => {
+    const [event, attendee] = await Promise.all([
+      this.eventsDomain.getEventById(eventId),
+      this.eventsDomain.getAttendeeById(attendeeId),
+    ]);
+
+    new Intercept("badRequest").boolean(!event, "Evento não encontrado");
+    new Intercept("badRequest").boolean(!attendee, "Participante não encontrado");
+    new Intercept("badRequest").boolean(attendee.eventId !== event.id, "Participante não encontrado");
+    new Intercept("badRequest").boolean(!!attendee.checkedInAt, "O participante já fez check-in");
+
+    attendee.checkIn();
+
+    await this.eventsDomain.saveAttendee(attendee);
+  };
+
   createAttendees = async (data: IRegisterForEventData): Promise<IRegisterForEventReturn> => {
     const { email, eventId, name } = data;
 
@@ -32,6 +49,8 @@ export class EventsApplication implements EventsApplicationDTO {
       email,
       eventId,
       name,
+      checkedInAt: null,
+      createdAt: null,
     });
 
     const attendeeWithSameEmailInEvent = await this.eventsDomain.getAttendeeByEventAndEmail(
@@ -79,7 +98,7 @@ export class EventsApplication implements EventsApplicationDTO {
     };
   };
 
-  getAttendeeBadge = async (eventId: string, attendeeId: string): Promise<IGetAttendeeBadgeReturn> => {
+  getAttendeeBadge = async (eventId: string, attendeeId: string, baseURL: string): Promise<IGetAttendeeBadgeReturn> => {
     const [event, attendee] = await Promise.all([
       this.eventsDomain.getEventById(eventId),
       this.eventsDomain.getAttendeeById(attendeeId),
@@ -87,6 +106,9 @@ export class EventsApplication implements EventsApplicationDTO {
 
     new Intercept("badRequest").boolean(!event, "Evento não encontrado");
     new Intercept("badRequest").boolean(!attendee, "Participante não encontrado");
+    new Intercept("badRequest").boolean(attendee.eventId !== event.id, "Participante não encontrado");
+
+    const checkInURL = new URL(`/events/${event.id}/attendees/${attendee.id}/check-in`, baseURL);
 
     return {
       badge: {
@@ -94,6 +116,7 @@ export class EventsApplication implements EventsApplicationDTO {
         attendeeId: attendee.id,
         attendeeName: attendee.name,
         eventTitle: event.title,
+        checkInURL: checkInURL.toString(),
       },
     };
   };
@@ -105,6 +128,18 @@ export class EventsApplication implements EventsApplicationDTO {
 
     return {
       event,
+    };
+  };
+
+  getEventAttendees = async (eventId: string): Promise<IGetEventAttendeesReturn> => {
+    const event = await this.eventsDomain.getEventById(eventId);
+
+    new Intercept("notFound").boolean(!event, "Evento não encontrado");
+
+    const attendees = await this.eventsDomain.getEventAttendees(event.id);
+
+    return {
+      attendees,
     };
   };
 }

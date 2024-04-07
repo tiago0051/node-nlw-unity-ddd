@@ -15,9 +15,11 @@ export class Router {
 
     await fastify.register(
       async (instance) => {
+        await eventsPresentation.attendeeCheckIn(instance);
         await eventsPresentation.createEvents(instance);
         await eventsPresentation.getAttendeeBadge(instance);
         await eventsPresentation.getEvent(instance);
+        await eventsPresentation.getEventAttendees(instance);
         await eventsPresentation.registerForEvent(instance);
       },
       {

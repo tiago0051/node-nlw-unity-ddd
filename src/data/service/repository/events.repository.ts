@@ -21,10 +21,12 @@ export class EventsRepository implements EventsRepositoryDTO {
         },
       },
       select: {
-        id: true,
-        name: true,
+        checkedInAt: true,
+        createdAt: true,
         email: true,
         eventId: true,
+        id: true,
+        name: true,
       },
     });
 
@@ -39,6 +41,24 @@ export class EventsRepository implements EventsRepositoryDTO {
     });
 
     return attendeeDB && new AttendeeEntity(attendeeDB, attendeeDB.id);
+  };
+
+  getEventAttendees = async (eventId: string): Promise<AttendeeEntity[]> => {
+    const attendeesDB = await this.prisma.attendee.findMany({
+      where: {
+        eventId,
+      },
+      select: {
+        checkedInAt: true,
+        createdAt: true,
+        email: true,
+        eventId: true,
+        id: true,
+        name: true,
+      },
+    });
+
+    return attendeesDB.map((attendee) => new AttendeeEntity(attendee, attendee.id));
   };
 
   getEventById = async (id: string): Promise<EventEntity> => {
@@ -117,10 +137,12 @@ export class EventsRepository implements EventsRepositoryDTO {
       create: attendee,
       update: attendee,
       select: {
-        id: true,
-        name: true,
+        checkedInAt: true,
+        createdAt: true,
         email: true,
         eventId: true,
+        id: true,
+        name: true,
       },
     });
 

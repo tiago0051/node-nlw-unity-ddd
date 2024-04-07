@@ -16,6 +16,26 @@ export class EventsPresentation implements EventsPresentationDTO {
     @inject(APPLICATION_TYPES.events)
     private readonly eventsApplication: EventsApplicationDTO,
   ) {}
+  attendeeCheckIn = async (fastify: FastifyInstance) => {
+    fastify.withTypeProvider<ZodTypeProvider>().get(
+      "/:eventId/attendees/:attendeeId/check-in",
+      {
+        schema: {
+          params: z.object({
+            eventId: z.string().uuid(),
+            attendeeId: z.string().uuid(),
+          }),
+        },
+      },
+      async (request, reply) => {
+        const { attendeeId, eventId } = request.params;
+
+        await this.eventsApplication.attendeeCheckIn(eventId, attendeeId);
+
+        return reply.send();
+      },
+    );
+  };
 
   createEvents = async (fastify: FastifyInstance) => {
     fastify.withTypeProvider<ZodTypeProvider>().post(
@@ -70,6 +90,7 @@ export class EventsPresentation implements EventsPresentationDTO {
                 attendeeId: z.string().uuid(),
                 attendeeName: z.string(),
                 eventTitle: z.string(),
+                checkInURL: z.string().url(),
               }),
             }),
           },
@@ -77,8 +98,9 @@ export class EventsPresentation implements EventsPresentationDTO {
       },
       async (request, reply) => {
         const { attendeeId, eventId } = request.params;
+        const baseURL = `${request.protocol}://${request.hostname}`;
 
-        const data = await this.eventsApplication.getAttendeeBadge(eventId, attendeeId);
+        const data = await this.eventsApplication.getAttendeeBadge(eventId, attendeeId, baseURL);
 
         return reply.send(data);
       },
@@ -110,6 +132,26 @@ export class EventsPresentation implements EventsPresentationDTO {
         const { eventId } = request.params;
 
         const data = await this.eventsApplication.getEvent(eventId);
+
+        return reply.send(data);
+      },
+    );
+  };
+
+  getEventAttendees = async (fastify: FastifyInstance) => {
+    fastify.withTypeProvider<ZodTypeProvider>().get(
+      "/:eventId/attendees",
+      {
+        schema: {
+          params: z.object({
+            eventId: z.string().uuid(),
+          }),
+        },
+      },
+      async (request, reply) => {
+        const { eventId } = request.params;
+
+        const data = await this.eventsApplication.getEventAttendees(eventId);
 
         return reply.send(data);
       },

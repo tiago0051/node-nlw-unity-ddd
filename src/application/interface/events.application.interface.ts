@@ -35,6 +35,7 @@ export interface IGetAttendeeBadgeReturn {
     attendeeId: string;
     attendeeName: string;
     eventTitle: string;
+    checkInURL: string;
   };
 }
 
@@ -46,4 +47,14 @@ export interface IGetEventReturn {
     maximumAttendees: number;
     slug: string;
   };
+}
+
+export interface IGetEventAttendeesReturn {
+  attendees: {
+    id: string;
+    name: string;
+    email: string;
+    checkedInAt: Date;
+    createdAt: Date;
+  }[];
 }

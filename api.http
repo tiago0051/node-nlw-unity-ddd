@@ -20,4 +20,10 @@ Content-Type: application/json
 GET http://localhost:3333/events/22f209af-76f2-4702-8dcb-f5dc047bd47b
 
 ###
+GET http://localhost:3333/events/22f209af-76f2-4702-8dcb-f5dc047bd47b/attendees
+
+###
 GET http://localhost:3333/events/22f209af-76f2-4702-8dcb-f5dc047bd47b/attendees/17cb05f9-a763-4dda-b636-d736dedb0891
+
+###
+GET http://localhost:3333/events/91a79f6e-4ff9-4692-a02d-41af12a35df5/attendees/1c4f8e2d-f36c-495a-a382-676e9bbb5472/check-in
