@@ -6,6 +6,7 @@ import { type EventsRepositoryDTO } from "../../data/dto/repository/events.repos
 import { type AttendeeEntity } from "../entity/AttendeeEntity";
 
 import { DATA_TYPES } from "../../data/dataTypes";
+import { ListFilter } from "../filter/listFilter";
 
 @injectable()
 export class EventsDomain implements EventsDomainDTO {
@@ -31,8 +32,8 @@ export class EventsDomain implements EventsDomainDTO {
     return await this.eventsRepository.getAttendeeById(attendeeId);
   };
 
-  getEventAttendees = async (eventId: string): Promise<AttendeeEntity[]> => {
-    return await this, this.eventsRepository.getEventAttendees(eventId);
+  getEventAttendees = async (eventId: string, filter: ListFilter): Promise<AttendeeEntity[]> => {
+    return await this, this.eventsRepository.getEventAttendees(eventId, filter);
   };
 
   getEventById = async (eventId: string): Promise<EventEntity> => {

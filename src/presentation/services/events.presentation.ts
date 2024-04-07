@@ -146,12 +146,30 @@ export class EventsPresentation implements EventsPresentationDTO {
           params: z.object({
             eventId: z.string().uuid(),
           }),
+          querystring: z.object({
+            take: z.coerce.number().int().positive().nullish(),
+            pageIndex: z.coerce.number().int().min(0).nullish(),
+            search: z.string().nullish(),
+          }),
+          response: {
+            200: z.object({
+              attendees: z.array(
+                z.object({
+                  id: z.string().uuid(),
+                  name: z.string(),
+                  email: z.string(),
+                  eventId: z.string().uuid(),
+                }),
+              ),
+            }),
+          },
         },
       },
       async (request, reply) => {
         const { eventId } = request.params;
+        const { pageIndex = null, search = null, take = null } = request.query;
 
-        const data = await this.eventsApplication.getEventAttendees(eventId);
+        const data = await this.eventsApplication.getEventAttendees(eventId, pageIndex, search, take);
 
         return reply.send(data);
       },

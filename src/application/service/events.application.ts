@@ -17,6 +17,7 @@ import { AttendeeEntity } from "../../domain/entity/AttendeeEntity";
 import { DOMAIN_TYPES } from "../../domain/domainTypes";
 import { EventEntity } from "../../domain/entity/EventEntity";
 import { Intercept } from "../../crossCutting/intercept/intercept";
+import { ListFilter } from "../../domain/filter/listFilter";
 
 @injectable()
 export class EventsApplication implements EventsApplicationDTO {
@@ -131,12 +132,19 @@ export class EventsApplication implements EventsApplicationDTO {
     };
   };
 
-  getEventAttendees = async (eventId: string): Promise<IGetEventAttendeesReturn> => {
+  getEventAttendees = async (
+    eventId: string,
+    pageIndex: number,
+    search: string,
+    take: number,
+  ): Promise<IGetEventAttendeesReturn> => {
     const event = await this.eventsDomain.getEventById(eventId);
 
     new Intercept("notFound").boolean(!event, "Evento não encontrado");
 
-    const attendees = await this.eventsDomain.getEventAttendees(event.id);
+    const listFilter = new ListFilter({ pageIndex, search, take });
+
+    const attendees = await this.eventsDomain.getEventAttendees(event.id, listFilter);
 
     return {
       attendees,

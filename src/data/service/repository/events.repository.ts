@@ -7,6 +7,7 @@ import { type EventsRepositoryDTO } from "../../dto/repository/events.repository
 import { DATA_TYPES } from "../../dataTypes";
 import { EventEntity } from "../../../domain/entity/EventEntity";
 import { AttendeeEntity } from "../../../domain/entity/AttendeeEntity";
+import { ListFilter } from "../../../domain/filter/listFilter";
 
 @injectable()
 export class EventsRepository implements EventsRepositoryDTO {
@@ -43,10 +44,32 @@ export class EventsRepository implements EventsRepositoryDTO {
     return attendeeDB && new AttendeeEntity(attendeeDB, attendeeDB.id);
   };
 
-  getEventAttendees = async (eventId: string): Promise<AttendeeEntity[]> => {
+  getEventAttendees = async (eventId: string, filter: ListFilter): Promise<AttendeeEntity[]> => {
     const attendeesDB = await this.prisma.attendee.findMany({
+      take: filter.take,
+      skip: filter.take * filter.pageIndex,
       where: {
-        eventId,
+        AND: [
+          {
+            eventId,
+          },
+          {
+            OR: filter.search
+              ? [
+                  {
+                    email: {
+                      contains: filter.search,
+                    },
+                  },
+                  {
+                    name: {
+                      contains: filter.search,
+                    },
+                  },
+                ]
+              : undefined,
+          },
+        ],
       },
       select: {
         checkedInAt: true,

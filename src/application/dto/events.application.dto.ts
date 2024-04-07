@@ -14,5 +14,10 @@ export interface EventsApplicationDTO {
   createEvents: (data: ICreateEventsData) => Promise<ICreateEventsReturn>;
   getAttendeeBadge: (eventId: string, attendeeId: string, baseURL: string) => Promise<IGetAttendeeBadgeReturn>;
   getEvent: (eventId: string) => Promise<IGetEventReturn>;
-  getEventAttendees: (eventId: string) => Promise<IGetEventAttendeesReturn>;
+  getEventAttendees: (
+    eventId: string,
+    pageIndex: number,
+    search: string,
+    take: number,
+  ) => Promise<IGetEventAttendeesReturn>;
 }
