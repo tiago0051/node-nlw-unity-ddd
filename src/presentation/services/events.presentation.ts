@@ -21,6 +21,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       "/:eventId/attendees/:attendeeId/check-in",
       {
         schema: {
+          tags: ["event"],
           params: z.object({
             eventId: z.string().uuid(),
             attendeeId: z.string().uuid(),
@@ -42,6 +43,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       "/",
       {
         schema: {
+          tags: ["event"],
           body: z.object({
             title: z.string(),
             details: z.string().nullish(),
@@ -79,6 +81,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       "/:eventId/attendees/:attendeeId",
       {
         schema: {
+          tags: ["event"],
           params: z.object({
             eventId: z.string().uuid(),
             attendeeId: z.string().uuid(),
@@ -112,6 +115,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       "/:eventId",
       {
         schema: {
+          tags: ["event"],
           params: z.object({
             eventId: z.string().uuid(),
           }),
@@ -143,6 +147,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       "/:eventId/attendees",
       {
         schema: {
+          tags: ["event"],
           params: z.object({
             eventId: z.string().uuid(),
           }),
@@ -181,6 +186,7 @@ export class EventsPresentation implements EventsPresentationDTO {
       "/:eventId/attendees",
       {
         schema: {
+          tags: ["event"],
           params: z.object({
             eventId: z.string().uuid(),
           }),

@@ -48,6 +48,9 @@ export class EventsRepository implements EventsRepositoryDTO {
     const attendeesDB = await this.prisma.attendee.findMany({
       take: filter.take,
       skip: filter.take * filter.pageIndex,
+      orderBy: {
+        name: "asc",
+      },
       where: {
         AND: [
           {
