@@ -9,6 +9,8 @@ import { type EventsPresentationDTO } from "../dto/events.presentation.dto";
 import { type EventsApplicationDTO } from "../../application/dto/events.application.dto";
 
 import { APPLICATION_TYPES } from "../../application/applicationTypes";
+import { AttendeeBadgeDTO, AttendeeDTO, EventDTO } from "../response/events.response.dto";
+import { ListQueryRequestDTO } from "../request/listQuery.request.dto";
 
 @injectable()
 export class EventsPresentation implements EventsPresentationDTO {
@@ -24,8 +26,20 @@ export class EventsPresentation implements EventsPresentationDTO {
           tags: ["event"],
           summary: "Attendee check-in in event",
           params: z.object({
-            eventId: z.string().uuid(),
-            attendeeId: z.string().uuid(),
+            eventId: z
+              .string({
+                description: "Identificador do evento",
+              })
+              .uuid({
+                message: "Evento inválido",
+              }),
+            attendeeId: z
+              .string({
+                description: "Identificador do participante",
+              })
+              .uuid({
+                message: "Participante inválido",
+              }),
           }),
         },
       },
@@ -47,19 +61,33 @@ export class EventsPresentation implements EventsPresentationDTO {
           tags: ["event"],
           summary: "Create an event",
           body: z.object({
-            title: z.string(),
-            details: z.string().nullish(),
-            maximumAttendees: z.number().nullish(),
+            title: z.string({
+              required_error: "O título do evento é obrigatório",
+              description: "Título do evento",
+              invalid_type_error: "É esperado o tipo 'string' para o título do evento",
+            }),
+            details: z
+              .string({
+                description: "Descrição do evento",
+                invalid_type_error: "É esperado o tipo 'string' para a descrição do evento",
+              })
+              .nullish(),
+            maximumAttendees: z
+              .number({
+                description: "Número máximo de participante no evento",
+                invalid_type_error: "É esperado o tipo 'number' para o número máximo de participantes do evento",
+              })
+              .int({
+                message: "É esperado um número inteiro para o número máximo de participantes do evento",
+              })
+              .positive({
+                message: "É esperado um número maior que zero para o número máximo de participantes do evento",
+              })
+              .nullish(),
           }),
           response: {
             201: z.object({
-              event: z.object({
-                id: z.string().uuid(),
-                title: z.string(),
-                details: z.string().nullable(),
-                maximumAttendees: z.number().nullable(),
-                slug: z.string(),
-              }),
+              event: EventDTO,
             }),
           },
         },
@@ -80,24 +108,30 @@ export class EventsPresentation implements EventsPresentationDTO {
 
   getAttendeeBadge = async (fastify: FastifyInstance) => {
     fastify.withTypeProvider<ZodTypeProvider>().get(
-      "/:eventId/attendees/:attendeeId",
+      "/:eventId/attendees/:attendeeId/badge",
       {
         schema: {
           tags: ["event"],
           summary: "Get the attendee badge",
           params: z.object({
-            eventId: z.string().uuid(),
-            attendeeId: z.string().uuid(),
+            eventId: z
+              .string({
+                description: "Identificador do evento",
+              })
+              .uuid({
+                message: "Evento inválido",
+              }),
+            attendeeId: z
+              .string({
+                description: "Identificador do participante",
+              })
+              .uuid({
+                message: "Participante inválido",
+              }),
           }),
           response: {
             200: z.object({
-              badge: z.object({
-                attendeeEmail: z.string().email(),
-                attendeeId: z.string().uuid(),
-                attendeeName: z.string(),
-                eventTitle: z.string(),
-                checkInURL: z.string().url(),
-              }),
+              badge: AttendeeBadgeDTO,
             }),
           },
         },
@@ -121,17 +155,17 @@ export class EventsPresentation implements EventsPresentationDTO {
           tags: ["event"],
           summary: "Get information about an event",
           params: z.object({
-            eventId: z.string().uuid(),
+            eventId: z
+              .string({
+                description: "Identificador do evento",
+              })
+              .uuid({
+                message: "Evento inválido",
+              }),
           }),
           response: {
             200: z.object({
-              event: z.object({
-                id: z.string().uuid(),
-                title: z.string(),
-                details: z.string().nullable(),
-                maximumAttendees: z.number().nullable(),
-                slug: z.string(),
-              }),
+              event: EventDTO,
             }),
           },
         },
@@ -154,23 +188,18 @@ export class EventsPresentation implements EventsPresentationDTO {
           tags: ["event"],
           summary: "Get event attendees",
           params: z.object({
-            eventId: z.string().uuid(),
+            eventId: z
+              .string({
+                description: "Identificador do evento",
+              })
+              .uuid({
+                message: "Evento inválido",
+              }),
           }),
-          querystring: z.object({
-            take: z.coerce.number().int().positive().nullish().default(10),
-            pageIndex: z.coerce.number().int().min(0).nullish().default(0),
-            search: z.string().nullish(),
-          }),
+          querystring: ListQueryRequestDTO,
           response: {
             200: z.object({
-              attendees: z.array(
-                z.object({
-                  id: z.string().uuid(),
-                  name: z.string(),
-                  email: z.string(),
-                  eventId: z.string().uuid(),
-                }),
-              ),
+              attendees: z.array(AttendeeDTO),
             }),
           },
         },
@@ -194,20 +223,33 @@ export class EventsPresentation implements EventsPresentationDTO {
           tags: ["event"],
           summary: "Register new attendee in an event",
           params: z.object({
-            eventId: z.string().uuid(),
+            eventId: z
+              .string({
+                description: "Identificador do evento",
+              })
+              .uuid({
+                message: "Evento inválido",
+              }),
           }),
           body: z.object({
-            name: z.string(),
-            email: z.string().email(),
+            name: z.string({
+              description: "Nome do participante",
+              invalid_type_error: "É esperado o tipo 'string' para o nome do participante",
+              required_error: "O nome do participante é obrigatório",
+            }),
+            email: z
+              .string({
+                description: "Email do participante",
+                invalid_type_error: "É esperado o tipo 'string' para o email do participante",
+                required_error: "O email do participante é obrigatório",
+              })
+              .email({
+                message: "Email inválido",
+              }),
           }),
           response: {
             201: z.object({
-              attendee: z.object({
-                id: z.string().uuid(),
-                name: z.string(),
-                email: z.string().email(),
-                eventId: z.string().uuid(),
-              }),
+              attendee: AttendeeDTO,
             }),
           },
         },
